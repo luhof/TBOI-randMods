@@ -31,6 +31,17 @@ local sodaBonus = {
   SALTY = 1
 }
 
+-- pill I'm always angry
+local ImAlwaysAngry = {
+    ID = Isaac.GetPillEffectByName("I'm Always Angry"),
+    BONUS_DMG = 7,
+    BONUS_TH = 30,
+    SCALE = 1,
+    IsAngry = false
+}
+
+ImAlwaysAngry.Color = Isaac.AddPillEffectToPool(ImAlwaysAngry.ID)
+
 local function updateDrips(player)
     hasSoda.COKE = player:HasCollectible(sodaId.COKE)
     hasSoda.ENERGY = player:HasCollectible(sodaId.ENERGY)
@@ -60,6 +71,18 @@ function Sodas:onUpdate(player)
   end
 
   updateDrips(player)
+
+  --update angry pill effect
+  if ImAlwaysAngry.Room ~= nil and game:GetLevel():GetCurrentRoomIndex() ~= ImAlwaysAngry.Room then
+    player:SetColor(Color(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0), 0, 0, false, false)
+    player.SpriteScale = ImAlwaysAngry.FormerScale
+    ImAlwaysAngry.IsAngry = false
+    ImAlwaysAngry.Room = nil
+    player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+    player:AddCacheFlags(CacheFlag.CACHE_RANGE)
+    player:EvaluateItems()
+  end
+
 end
 
 function Sodas:onCache(player, cacheFlag)
@@ -76,6 +99,10 @@ function Sodas:onCache(player, cacheFlag)
         if player:HasCollectible(sodaId.SALTY) then
             player.Damage = player.Damage + sodaBonus.SALTY
         end
+
+        if ImAlwaysAngry.IsAngry then
+            player.Damage = player.Damage + ImAlwaysAngry.BONUS_DMG
+        end
     end
 
     -- shotspeed cache
@@ -90,6 +117,9 @@ function Sodas:onCache(player, cacheFlag)
         if player:HasCollectible(sodaId.ENERGY) then
             player.TearHeight = player.TearHeight + sodaBonus.ENERGY_TH
             player.TearFallingSpeed = player.TearFallingSpeed + sodaBonus.ENERGY_FS
+        end
+        if ImAlwaysAngry.IsAngry then
+            player.TearHeight = player.TearHeight - ImAlwaysAngry.BONUS_TH
         end
     end
 
@@ -120,3 +150,18 @@ end
   Sodas:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Sodas.onPlayerInit)
   Sodas:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sodas.onUpdate)
   Sodas:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Sodas.onCache)
+
+-- I'm always angry proc code
+function ImAlwaysAngry:Proc(_pillEffect)
+    local player = game:GetPlayer(0)
+    player:SetColor(Color(0.0, 0.7, 0.0, 1.0, 0.0, 0.0, 0.0), 0, 0, false, false)
+    ImAlwaysAngry.FormerScale = player.SpriteScale
+    player.SpriteScale = ImAlwaysAngry.FormerScale + Vector(ImAlwaysAngry.SCALE, ImAlwaysAngry.SCALE)
+    ImAlwaysAngry.Room = game:GetLevel():GetCurrentRoomIndex()
+    ImAlwaysAngry.IsAngry = true
+    player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+    player:AddCacheFlags(CacheFlag.CACHE_RANGE)
+
+end
+
+  Sodas:AddCallback(ModCallbacks.MC_USE_PILL, ImAlwaysAngry.Proc, ImAlwaysAngry.ID) -- id used to filter callback
