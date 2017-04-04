@@ -1,0 +1,8 @@
+<items gfxroot="gfx/items/" version="1">
+  <passive cache="damage" name="Coke Zero" description="Around 50 tsp. of sugar !" gfx="cokezero.png" />
+  <passive cache="speed range" name="Energy Drink" description="Won't sleep tonight" gfx="energydrink.png" />
+  <passive cache="shotspeed" name="Lemonade" description="When life gives you lemon" gfx="lemonade.png" />
+  <passive cache="luck" name="Orange Soda" description="OJ for the brats" gfx="orangesoda.png" />
+  <passive cache="flying" name="Rotten Soda" description="Weird things float in it" gfx="rottensoda.png" />
+  <passive cache="damage" name="Salty Water" description="Sea water that makes you wanna puke" gfx="saltywater.png" />
+</items>
